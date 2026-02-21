@@ -24,17 +24,23 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest playwright pytest-playwright pytest-html
-        playwright install chromium --with-deps
+        playwright install --with-deps
 
     - name: Run tests
-      # Added --video on to record your test execution
-      run: pytest tests/ -v --html=report.html --self-contained-html --screenshot only-on-failure --video on
+      # This command runs tests on both Desktop Chromium and Mobile iPhone 13 viewports
+      run: |
+        pytest tests/ -v \
+        --browser chromium \
+        --device="iPhone 13" \
+        --html=report.html --self-contained-html \
+        --screenshot only-on-failure \
+        --video on
     
-    - name: Upload test report
+    - name: Upload test results
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: playwright-report
+        name: playwright-execution-results
         path: |
           report.html
           test-results/
