@@ -3,8 +3,7 @@ name: Run Playwright Tests
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  pull_request:    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -27,20 +26,18 @@ jobs:
         playwright install --with-deps
 
     - name: Run tests
-      # This command runs tests on both Desktop Chromium and Mobile iPhone 13 viewports
       run: |
+        # We tell pytest to put everything in a folder called 'all_results'
         pytest tests/ -v \
-        --browser chromium \
-        --device="iPhone 13" \
-        --html=report.html --self-contained-html \
+        --html=all_results/report.html --self-contained-html \
         --screenshot only-on-failure \
-        --video on
+        --video on \
+        --output=all_results/
     
-    - name: Upload test results
+    - name: Upload everything
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: playwright-execution-results
-        path: |
-          report.html
-          test-results/
+        name: complete-test-package
+        # This tells GitHub to grab the WHOLE folder
+        path: all_results/
