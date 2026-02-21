@@ -24,27 +24,17 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest playwright pytest-playwright pytest-html
-        playwright install --with-deps
+        playwright install chromium --with-deps
 
     - name: Run tests
-      run: |
-        # Step 1: Force create the directory
-        mkdir -p all_results
-        
-        # Step 2: Run tests with mobile emulation
-        pytest tests/ -v \
-        --browser chromium \
-        --device="iPhone 13" \
-        --html=all_results/report.html --self-contained-html \
-        --screenshot only-on-failure \
-        --video on \
-        --output=all_results/
-      # This allows the workflow to continue to the upload step even if tests fail
-      continue-on-error: true 
-
-    - name: Upload everything
+      # Added --video on to record your test execution
+      run: pytest tests/ -v --html=report.html --self-contained-html --screenshot only-on-failure --video on
+    
+    - name: Upload test report
       uses: actions/upload-artifact@v4
-      if: always() # CRITICAL: This ensures upload happens even after failure
+      if: always()
       with:
-        name: mobile-debug-package
-        path: all_results/
+        name: playwright-report
+        path: |
+          report.html
+          test-results/
