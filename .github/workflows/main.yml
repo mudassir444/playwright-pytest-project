@@ -24,24 +24,27 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest playwright pytest-playwright pytest-html
-        # Installs all browsers + Linux system dependencies for mobile emulation
-        playwright install --with-deps 
+        playwright install --with-deps
 
     - name: Run tests
-      # We use 'all_results' to group everything together
       run: |
+        # Step 1: Force create the directory
+        mkdir -p all_results
+        
+        # Step 2: Run tests with mobile emulation
         pytest tests/ -v \
         --browser chromium \
         --device="iPhone 13" \
         --html=all_results/report.html --self-contained-html \
         --screenshot only-on-failure \
-        --video retain-on-failure \
+        --video on \
         --output=all_results/
-      continue-on-error: true # This ensures the upload step still runs if tests fail
+      # This allows the workflow to continue to the upload step even if tests fail
+      continue-on-error: true 
 
-    - name: Upload Debugging Artifacts
+    - name: Upload everything
       uses: actions/upload-artifact@v4
-      if: always()
+      if: always() # CRITICAL: This ensures upload happens even after failure
       with:
-        name: mobile-failure-debug
+        name: mobile-debug-package
         path: all_results/
